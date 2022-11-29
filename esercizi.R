@@ -121,7 +121,7 @@
   mod_uni = ' lat1=~ Q6A + Q10A + Q7A + Q3A + Q9A + Q16A \n '
   mod_uni_fit_UVI = cfa( model = mod_uni, data = dataxITA, std.lv = TRUE)
   
-  summary(mod_uni_fit_UVI, fit.measures = TRUE)
+  summary(mod_uni_fit_UVI, fit.measures = TRUE, )
   
   library(semPlot)
   x11();semPaths(object = mod_uni_fit_UVI, what="model", whatLabels = "std")
@@ -157,3 +157,63 @@
   reliability(mod_plu_fit_UVI)
 }
 
+# E s e r c i z i o   3   Modello Completo
+{
+  load('Datasets-20221124/mach/mach.Rdata')
+  
+  # 1° punto
+  str(datax)
+  summary(datax)  # insieme di punteggi categoriali da -8 a 8 su 20 item divisi per nazione
+  
+  # 2° punto
+  dataxITA <- datax[datax$country == "IT",]
+  dataxITA <- dataxITA[,1:20]
+  
+  # 3° punto
+  library(lavaan)
+  
+
+  
+  heatmap(cor(dataxITA), scale = 'none')
+  mod_uni = ' lat1=~ Q1A + Q2A + Q3A + Q4A + Q5A + Q6A + Q7A + Q8A + Q9A + Q10A + Q11A + Q12A + Q13A + Q14A + Q15A + Q16A + Q17A + Q18A + Q19A + Q20A \n'
+  mod_uni_fit_UVI = cfa( model = mod_uni, data = dataxITA, std.lv = TRUE)
+  
+  summary(mod_uni_fit_UVI, fit.measures = TRUE, standardized=TRUE )
+  
+  library(semPlot)
+  x11();semPaths(object = mod_uni_fit_UVI, what="model", whatLabels = "std")
+  
+  # 4° punto
+  #* L'adattamento del modello ai dati sembra buono se si guarda l'indice RMSEA è molto basso 0.045 e inferiore al p-value < 0.05
+  #* se guardiamo le lambda stimate ci si accorfe di lambda con direzioni opposte, per cui o non è il caso di inserirle in questa scala o andrebbero invertite
+  
+  # 5° punto
+  source('Utilities-20221124/reliability_semTools.R')
+  round(reliability(mod_uni_fit_UVI),5)
+  #*secondo gli indici alpha e omega il nostro test ha una attendibilità interna pessima
+  
+  # 6° punto
+  mod_plu = ' lat1=~ Q13A + Q1A + Q20A + Q12A + Q18A + Q5A + Q8A + Q2A + Q15A + Q19A \n
+              lat2=~ Q7A + Q6A + Q10A + Q3A + Q9A + Q16A + Q4A + Q14A + Q17A + Q11A \n'
+  
+  mod_plu_fit_UVI = cfa( model = mod_plu, data = dataxITA, std.lv = TRUE)
+  summary(mod_plu_fit_UVI, fit.measures = TRUE, standardized=TRUE)
+  
+  x11();semPaths(object = mod_plu_fit_UVI, what="model", whatLabels = "std")
+  
+  # 7° piano
+  cfa_fits = matrix(NA, 2,6)  #creo mattice nuovo
+  cfa_fits[1,] = fitmeasures(object = mod_uni_fit_UVI,
+                             fit.measures = c('RMSEA', 'CFI', 'AIC', 'chisq', 'df', 'npar')) 
+  cfa_fits[2,] = fitmeasures(object = mod_plu_fit_UVI,
+                             fit.measures = c('RMSEA', 'CFI', 'AIC', 'chisq', 'df', 'npar'))
+  
+  colnames(cfa_fits) = c('RMSEA', 'CFI', 'AIC', 'chisq', 'df', 'npar')
+  rownames(cfa_fits) = c('uni', 'plu')
+  round(cfa_fits, 4)
+  
+  reliability(mod_plu_fit_UVI)
+  
+  #*il secondo modello è migliore sotto ogni indice misurato
+  #*sia gli alpha che gli omega hanno valori buoni sopra il 0.7
+}
