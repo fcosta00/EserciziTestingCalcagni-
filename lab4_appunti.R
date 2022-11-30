@@ -28,7 +28,7 @@ bfi_b <- bfi_split$B #cfa
 
 bfi_a_cor <- cor( bfi_a[,1:25], method ='spearman') #spearman perchè sono categoriali
 
-corrplot(corr =bfi_a_cor, method = 'circle')
+corrplot(corr = bfi_a_cor, method = 'circle')
 heatmap(bfi_a_cor, symm= TRUE, hclustfun = hclust)
 
 #ascolta i cucineremo ciabelle per piangere

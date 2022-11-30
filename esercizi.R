@@ -10,12 +10,14 @@
   
   # 1° punto
   library(corrplot)
-  corrplot(Chen)
-  heatmap(Chen, scale='none') #sempre vedo la distribuzione delle correlazioni ma permette di vedere le relazioni principali più facilmente
+  corrplot(Chen, method = 'circle')
+  heatmap(Chen, symm= TRUE, hclustfun = hclust) #sempre vedo la distribuzione delle correlazioni ma permette di vedere le relazioni principali più facilmente
+  
+  colnames(Chen) = rownames(Chen)
   
   # 2° punto
   library(lavaan)
-  mod_uni = ' lat1=~ afraid + frustrated + worried \n '
+  mod_uni = ' lat1=~ Social_functioning+dif_reasoning+slow_react+confused+forgetful+dif_concent+tired+energetic.R+worn_out+peppy.R+calm.R+blue+happy.R+nervous+down+afraid+frustrated+worried \n '
   mod_uni_fit_UVI = cfa( model = mod_uni, sample.cov = Chen, sample.nobs = 403, std.lv = TRUE)
   mod_uni_fit_ULI = cfa( model = mod_uni, sample.cov = Chen, sample.nobs = 403)
   
@@ -30,9 +32,9 @@
   matrix_mod_ULI
   
   # 4° punto
-  mod_plu = ' lat1=~ afraid + frustrated + worried \n
-              lat2=~ dif_concent + dif_reasoning + confused \n
-              lat3=~ worn_out + tired \n
+  mod_plu = ' lat1=~ nervous + blue + down + frustrated + worried + afraid \n
+              lat2=~ slow_react + forgetful + confused + dif_reasoning + dif_concent \n
+              lat3=~ Social_functioning + happy.R + calm.R + energetic.R + peppy.R + tired + worn_out \n
               lat1~~ 0*lat2 \n
               lat1~~ 0*lat3 \n
               lat2~~ 0*lat3 \n'
