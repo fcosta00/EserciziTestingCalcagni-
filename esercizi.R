@@ -51,7 +51,7 @@
   
   # 5° punto
   library(semPlot)
-  x11();semPaths(object = mod_plu_fit_UVI, what="model", whatLabels = "std")
+  x11();semPaths(object = mod_plu_fit_UVI, what="model", whatLabels = "std.all")
   
   # 6° punto
   #??????????????????????????
