@@ -98,7 +98,7 @@
   
   # 6° punto
   pairs(att2)
-  heatmap(cov(att2), scale='none')
+  heatmap(cov(att2), symm= TRUE, hclustfun = hclust)
   library(corrplot)
   corrplot(cor(att2))
   #commento boh????????
@@ -119,14 +119,14 @@
   # 3° punto
   library(lavaan)
   
-  heatmap(cor(dataxITA), scale = 'none')
+  heatmap(cor(dataxITA), symm= TRUE, hclustfun = hclust)
   mod_uni = ' lat1=~ Q6A + Q10A + Q7A + Q3A + Q9A + Q16A \n '
   mod_uni_fit_UVI = cfa( model = mod_uni, data = dataxITA, std.lv = TRUE)
   
-  summary(mod_uni_fit_UVI, fit.measures = TRUE, )
+  summary(mod_uni_fit_UVI, fit.measures = TRUE )
   
   library(semPlot)
-  x11();semPaths(object = mod_uni_fit_UVI, what="model", whatLabels = "std")
+  x11();semPaths(object = mod_uni_fit_UVI, what="model", whatLabels = "std.all")
   
   # 4° punto
     #* L'adattamento del modello sembra buono, i valori di lambda stimati oscillano tra i 0.44 e i 0.67
@@ -143,7 +143,7 @@
   mod_plu_fit_UVI = cfa( model = mod_plu, data = dataxITA, std.lv = TRUE)
   summary(mod_plu_fit_UVI, fit.measures = TRUE)
   
-  x11();semPaths(object = mod_plu_fit_UVI, what="model", whatLabels = "std")
+  x11();semPaths(object = mod_plu_fit_UVI, what="model", whatLabels = "std.all")
   
   # 7° piano
   cfa_fits = matrix(NA, 2,6)  #creo mattice nuovo
@@ -176,14 +176,14 @@
   
 
   
-  heatmap(cor(dataxITA), scale = 'none')
+  heatmap(cor(dataxITA), symm= TRUE, hclustfun = hclust)
   mod_uni = ' lat1=~ Q1A + Q2A + Q3A + Q4A + Q5A + Q6A + Q7A + Q8A + Q9A + Q10A + Q11A + Q12A + Q13A + Q14A + Q15A + Q16A + Q17A + Q18A + Q19A + Q20A \n'
   mod_uni_fit_UVI = cfa( model = mod_uni, data = dataxITA, std.lv = TRUE)
   
   summary(mod_uni_fit_UVI, fit.measures = TRUE, standardized=TRUE )
   
   library(semPlot)
-  x11();semPaths(object = mod_uni_fit_UVI, what="model", whatLabels = "std")
+  x11();semPaths(object = mod_uni_fit_UVI, what="model", whatLabels = "std.all")
   
   # 4° punto
   #* L'adattamento del modello ai dati sembra buono se si guarda l'indice RMSEA è molto basso 0.045 e inferiore al p-value < 0.05
@@ -201,7 +201,7 @@
   mod_plu_fit_UVI = cfa( model = mod_plu, data = dataxITA, std.lv = TRUE)
   summary(mod_plu_fit_UVI, fit.measures = TRUE, standardized=TRUE)
   
-  x11();semPaths(object = mod_plu_fit_UVI, what="model", whatLabels = "std")
+  x11();semPaths(object = mod_plu_fit_UVI, what="model", whatLabels = "std.all")
   
   # 7° piano
   cfa_fits = matrix(NA, 2,6)  #creo mattice nuovo
