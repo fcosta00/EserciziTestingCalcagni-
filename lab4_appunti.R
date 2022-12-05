@@ -16,7 +16,7 @@ plot(table(bfi_reversed[,1])) #brutto raro
 #automatizziamo la creazione dei 25 grafici
 x11();par(mfrow=c(5,5)) #tabella 5x5 dove sistemo i grafici
 for(j in 1:25){
-  barplot(table(bfi[,j]),main=colnames(bfi_reversed)[j])  
+  barplot(table(bfi_reversed[,j]),main=colnames(bfi_reversed)[j])  
 } #ci sono item che hanno praticamente risposto le stesse domande, questo significa che l'item di interesse è poco informativo in quanto non c'è differenza nel nostro campione testato
 
 #CIAO TOMMI SEI L'EROE DEL CORSO TI AMIAMO TUE FANS ANNA E ANNA  <3

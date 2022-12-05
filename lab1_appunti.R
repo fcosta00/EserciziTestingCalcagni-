@@ -47,8 +47,3 @@ Phi = model_visual_stimato$psi
 Theta_delta = model_visual_stimato$theta #varianza residui mentre varianza degli errori 0
 
 #matrice dei residui per valurare bontà modello
-
-
-
-model_two = " percezione =~ x1 + x2 + x3 \n  eta2 =~ x4 + x5 + x6 \n  eta3 =~ x7 + x8 + x9 \n  eta1 ~~ 0*eta2 " #eta1 ~~ 0*eta2 correlazione tra le due settata a 0
-

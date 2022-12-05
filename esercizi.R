@@ -68,7 +68,7 @@
   att2 <- attitude[,2:7] #prendo solo le colonne da 2 a 7, escludo per cui la prima variabile oddervata
   
   # 1° punto
-  describe(att2)
+  #describe(att2)
   
   # 2° punto
   source('Utilities-20221124/split_half.R')
@@ -218,4 +218,94 @@
   
   #*il secondo modello è migliore sotto ogni indice misurato
   #*sia gli alpha che gli omega hanno valori buoni sopra il 0.7
+}
+
+# E s e r c i z i o   4
+{
+  library(lavaan)
+  library(semPlot)
+  source('Utilities-20221124/plot_lavaan_model.R')
+  
+  str(data_ex4)
+  
+  # 1° punto -----
+  data_ord = data_ex4 # d'ora innanzi lavoriamo su bfi.ord che è lo stesso di bfi_B e contiene variabili dichiarate come ordinali
+  for(j in 1:NCOL(data_ord)){
+    data_ord[,j] = factor(data_ord[,j],ordered = TRUE)
+  }
+  
+  mod_uni <- 'lat1=~ V1+V2+V3+V4+V5+V6+V7+V8+V9+V10+V11+V12+V13+V14+V15 \n'
+  mod_uni_fit <- cfa(model = mod1_uni, data = data_ord, ordered = names(data_ord), estimator="DWLS")
+  summary(mod1_uni_fit, fit.measures = TRUE, standardized=TRUE )
+  
+  
+  # 2° punto ------
+  mod_tri_ort <- ' lat1=~ V1+V2+V3+V4+V5 \n
+                    lat2=~ V6+V7+V8+V9+V10 \n
+                    lat3=~ V11+V12+V13+V14+V15 \n
+                    lat1~~ 0*lat2 \n
+                    lat1~~ 0*lat3 \n
+                    lat2~~ 0*lat3 \n'
+  mod_tri_ort_fit <- cfa(model = mod_tri_ort, data = data_ord, ordered = names(data_ord), estimator="DWLS")
+  summary(mod_tri_ort_fit, fit.measures = TRUE, standardized=TRUE )
+  
+  
+  # 3° punto  ------
+  mod_tri_clx <- ' lat1=~ V1+V2+V3+V4+V5 \n
+                    lat2=~ V6+V7+V8+V9+V10 \n
+                    lat3=~ V11+V12+V13+V14+V15 \n'
+  mod_tri_clx_fit <- cfa(model = mod_tri_clx, data = data_ord, ordered = names(data_ord), estimator="DWLS")
+  summary(mod_tri_clx_fit, fit.measures = TRUE, standardized=TRUE )
+  
+  
+  # 4° punto  ------
+  bfi.fits = matrix(NA,3,5) #matrice per i risultati dei fit dei modelli
+  bfi.fits[1,] = fitmeasures(object = mod_uni_fit,fit.measures = c("RMSEA","CFI","chisq","df","npar"))
+  bfi.fits[2,] = fitmeasures(object = mod_tri_ort_fit,fit.measures = c("RMSEA","CFI","chisq","df","npar"))
+  bfi.fits[3,] = fitmeasures(object = mod_tri_clx_fit,fit.measures = c("RMSEA","CFI","chisq","df","npar"))
+  rownames(bfi.fits) = c("mod_uni","mod_tri_ort",'mod_tri_clx')
+  colnames(bfi.fits) = c("RMSEA","CFI","chisq","df","npar")
+      #il mod_tri_clx è notevolemente migliore secondo ogni indice
+  
+  # 5° punto  ------
+  plot_lavaan_model(fitted_model = mod_tri_clx_fit)
+  
+  # Estrazione delle matrici del modello 
+  A = inspect(object = mod_tri_clx_fit,what = "std.all")
+  
+  A$lambda #Lambda
+  A$theta #Theta_delta
+  A$psi #Phi
+  
+  #????????
+  
+  
+  # 6° punto -----
+  cor_ex4 <- cor( data_ex4, method ='spearman')
+  data_ex4_hclust = hclust( d= dist(cor_ex4), method = 'ward.D2')
+  plot(data_ex4_hclust);
+  
+  mod_tri_ort_ward <- 'lat1=~ V2+V12+V14+V9+V13+V3+V11+V15 \n
+                  lat2=~ V1+V4+V5 \n
+                  lat3=~ V6+V7+V8+V10 \n'
+  
+  
+  
+  data_ex4_hclust = hclust( d= dist(cor_ex4), method = 'complete')
+  plot(data_ex4_hclust);
+  
+  mod_tri_ort_full <- 'lat1=~ V2+V12+V14+V9+V13+V3+V11+V15 \n
+                  lat2=~ V1+V4+V5+V6+V7+V8+V10 \n'
+  
+  mod_tri_ort_ward_fit <- cfa(model = mod_tri_ort_ward, data = data_ord, ordered = names(data_ord), estimator="DWLS")
+  mod_tri_ort_full_fit <- cfa(model = mod_tri_ort_full, data = data_ord, ordered = names(data_ord), estimator="DWLS")
+  
+  bfi.fits = matrix(NA,3,5) #matrice per i risultati dei fit dei modelli
+  bfi.fits[1,] = fitmeasures(object = mod_tri_ort_ward_fit,fit.measures = c("RMSEA","CFI","chisq","df","npar"))
+  bfi.fits[2,] = fitmeasures(object = mod_tri_ort_fit,fit.measures = c("RMSEA","CFI","chisq","df","npar"))
+  bfi.fits[3,] = fitmeasures(object = mod_tri_ort_full_fit,fit.measures = c("RMSEA","CFI","chisq","df","npar"))
+  rownames(bfi.fits) = c("ward","mod_tri_ort",'complete')
+  colnames(bfi.fits) = c("RMSEA","CFI","chisq","df","npar")
+  
+  
 }
