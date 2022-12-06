@@ -34,11 +34,11 @@ source("laboratorio/lab4.R") #recuperiamo il lavoro fatto nel precedente laborat
 # Procediamo, lavorando sul 50% restante del dataset: bfi_B
 
 # Prima di definire il modello ed adattarlo ai dati, nel caso di variabili categoriali, occorre che queste siano definite come "ordered factors"
-str(bfi_B,1)
+str(bfi_b)
 # Attualmente le variabili nel dataframe bfi sono definite come numeriche e/o intere. Per ciascuna delle 25 variabili dobbiamo applicare una trasformazione per renderle categoriali ordinate in modo che lavaan possa riconoscerle come tali.
 
 # Facciamo un ciclo evitando di riscrivere a mano 25 volte la trasformazione:
-bfi.ord = bfi_B # d'ora innanzi lavoriamo su bfi.ord che è lo stesso di bfi_B e contiene variabili dichiarate come ordinali
+bfi.ord = bfi_b # d'ora innanzi lavoriamo su bfi.ord che è lo stesso di bfi_B e contiene variabili dichiarate come ordinali
 for(j in 1:25){
   bfi.ord[,j] = factor(bfi.ord[,j],ordered = TRUE)
 }
@@ -64,10 +64,10 @@ bfi.model2a = "f1=~A1+A2+A3+A4+A5+C1+C2+C3+C4+C5+E1+E2+E4 \n f2=~E3+E5+O1+O3 \n 
 bfi.model2b = "f1=~A1+A2+A3+A4+A5+C1+C2+C3+C4+C5+E1+E2+E3+E4+E5+O1+O3 \n f2=~N1+N2+N3+N4+N5 \n f3=~O2+O4+O5"
 
 # stima dei modelli
-bfi.cfa0 = cfa(model = bfi.model0,data = bfi.ord[,1:25],ordered = names(bfi.ord)[1:25],estimator="DWLS")
-bfi.cfa1 = cfa(model = bfi.model1,data = bfi.ord[,1:25],ordered = names(bfi.ord)[1:25],estimator="DWLS")
-bfi.cfa2a = cfa(model = bfi.model2a,data = bfi.ord[,1:25],ordered = names(bfi.ord)[1:25],estimator="DWLS")
-bfi.cfa2b = cfa(model = bfi.model2b,data = bfi.ord[,1:25],ordered = names(bfi.ord)[1:25],estimator="DWLS")
+bfi.cfa0 = cfa(model = bfi.model0, data = bfi.ord[,1:25], ordered = names(bfi.ord)[1:25], estimator="DWLS")
+bfi.cfa1 = cfa(model = bfi.model1, data = bfi.ord[,1:25], ordered = names(bfi.ord)[1:25], estimator="DWLS")
+bfi.cfa2a = cfa(model = bfi.model2a, data = bfi.ord[,1:25], ordered = names(bfi.ord)[1:25], estimator="DWLS")
+bfi.cfa2b = cfa(model = bfi.model2b, data = bfi.ord[,1:25], ordered = names(bfi.ord)[1:25], estimator="DWLS")
 
 # valutazione dell'adattamento ai dati (fit dei modelli) -- nota: AIC non disponibile quando estimator="DWLS"
 bfi.fits = matrix(NA,4,5) #matrice per i risultati dei fit dei modelli
@@ -87,7 +87,7 @@ summary(bfi.cfa0,standardized=TRUE)
 
 # Grafico di model0
 #semPaths(bfi.cfa0,nCharNodes = 3,what = "model", whatLabels = "std.all",edge.label.cex = 1.5,edge.color = "black",sizeMan = 7,sizeLat=8,style = "lisrel",nDigits = 1,intercepts = FALSE,thresholds = FALSE)
-plot_lavaan_model(fitted_model = bfi.cfa0,intercepts=FALSE,)
+plot_lavaan_model(fitted_model = bfi.cfa0)
 
 # Estrazione delle matrici del modello 
 A = inspect(object = bfi.cfa0,what = "std.all")

@@ -26,8 +26,11 @@ plot_lavaan_model(fitted_model = mod2_fit, what = 'est')
 mod3 <- ' eta1 =~ ORIGPRT1 +WRITCOPY +CARBCOPY +ORIGPRT2' 
 
 mod3_fit = cfa(model = mod3, sample.cov = Sy, sample.nobs = n, std.lv = TRUE) #UVI perchè vogliamo vedere se i lambda sono uguali
-plot_lavaan_model(fitted_model = mod3_fit, what = 'est')
+plot_lavaan_model(fitted_model = mod3_fit, what = 'std')
+inspect(object = mod3_fit,what = "std.all")
 
+
+summary(object = mod3_fit)
 
 #scelta modello migliore  
 bfi.fits = matrix(NA,3,5) #matrice per i risultati dei fit dei modelli

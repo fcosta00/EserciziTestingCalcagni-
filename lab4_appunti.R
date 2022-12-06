@@ -19,6 +19,7 @@ for(j in 1:25){
   barplot(table(bfi_reversed[,j]),main=colnames(bfi_reversed)[j])  
 } #ci sono item che hanno praticamente risposto le stesse domande, questo significa che l'item di interesse è poco informativo in quanto non c'è differenza nel nostro campione testato
 
+
 #CIAO TOMMI SEI L'EROE DEL CORSO TI AMIAMO TUE FANS ANNA E ANNA  <3
 
 bfi_split <- split_dataset(data = bfi_reversed, prop = 0.5, seedx =121 ) #splitto il dataset in proporzione 0.5 nella prima parte, seedx è il seme per la generazione random

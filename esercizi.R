@@ -225,6 +225,7 @@
   library(lavaan)
   library(semPlot)
   source('Utilities-20221124/plot_lavaan_model.R')
+  source('Utilities-20221124/reliability_semTools.R')
   
   str(data_ex4)
   
@@ -235,8 +236,8 @@
   }
   
   mod_uni <- 'lat1=~ V1+V2+V3+V4+V5+V6+V7+V8+V9+V10+V11+V12+V13+V14+V15 \n'
-  mod_uni_fit <- cfa(model = mod1_uni, data = data_ord, ordered = names(data_ord), estimator="DWLS")
-  summary(mod1_uni_fit, fit.measures = TRUE, standardized=TRUE )
+  mod_uni_fit <- cfa(model = mod_uni, data = data_ord, ordered = names(data_ord), estimator="DWLS")
+  summary(mod_uni_fit, fit.measures = TRUE, standardized=TRUE )
   
   
   # 2° punto ------
@@ -277,35 +278,105 @@
   A$theta #Theta_delta
   A$psi #Phi
   
-  #????????
-  
+  reliability(mod_tri_clx_fit)
+    #i valori di attendibilità del modello sono ancora molto bassi
   
   # 6° punto -----
-  cor_ex4 <- cor( data_ex4, method ='spearman')
-  data_ex4_hclust = hclust( d= dist(cor_ex4), method = 'ward.D2')
-  plot(data_ex4_hclust);
   
-  mod_tri_ort_ward <- 'lat1=~ V2+V12+V14+V9+V13+V3+V11+V15 \n
-                  lat2=~ V1+V4+V5 \n
-                  lat3=~ V6+V7+V8+V10 \n'
+  #miglioro il modello andando a ridurre i parametri di predizione
   
   
   
-  data_ex4_hclust = hclust( d= dist(cor_ex4), method = 'complete')
-  plot(data_ex4_hclust);
+}
+
+# E s e r c i z i o   5
+{
+  load('Datasets-20221124/data_ex5.Rdata')
+  library(lavaan)
+  library(semPlot)
   
-  mod_tri_ort_full <- 'lat1=~ V2+V12+V14+V9+V13+V3+V11+V15 \n
-                  lat2=~ V1+V4+V5+V6+V7+V8+V10 \n'
+  str(S)
   
-  mod_tri_ort_ward_fit <- cfa(model = mod_tri_ort_ward, data = data_ord, ordered = names(data_ord), estimator="DWLS")
-  mod_tri_ort_full_fit <- cfa(model = mod_tri_ort_full, data = data_ord, ordered = names(data_ord), estimator="DWLS")
+  # 1° punto ------
+  mod_duo_ort <- ' lat1=~ Y1+Y2+Y3+Y4+Y5 \n
+                    lat2=~ Y6+Y7+Y8+Y9+Y10 \n
+                    lat1~~ 0*lat2 \n'
+  mod_duo_ort_fit <- cfa(model = mod_duo_ort, sample.cov = S, sample.nobs = 1250)
   
-  bfi.fits = matrix(NA,3,5) #matrice per i risultati dei fit dei modelli
-  bfi.fits[1,] = fitmeasures(object = mod_tri_ort_ward_fit,fit.measures = c("RMSEA","CFI","chisq","df","npar"))
-  bfi.fits[2,] = fitmeasures(object = mod_tri_ort_fit,fit.measures = c("RMSEA","CFI","chisq","df","npar"))
-  bfi.fits[3,] = fitmeasures(object = mod_tri_ort_full_fit,fit.measures = c("RMSEA","CFI","chisq","df","npar"))
-  rownames(bfi.fits) = c("ward","mod_tri_ort",'complete')
-  colnames(bfi.fits) = c("RMSEA","CFI","chisq","df","npar")
   
+  # 2° punto -----
+  fitmeasures(object = mod_duo_ort_fit,fit.measures = c("RMSEA","CFI","chisq","df","npar"))
+  #sia l' RMSEA che il cfi sono fuori range
+  
+  summary(mod_duo_ort_fit, fit.measures = TRUE, standardized=TRUE )
+  
+  #modifico con gli indici di modifica
+  modificationindices(object = mod_duo_ort_fit,sort. = TRUE)
+  
+  mod1_duo_ort <- ' lat1=~ Y1+Y2+Y4+Y5 \n
+                    lat2=~ Y6+Y7+Y8+Y9+Y10+Y5 \n
+                    lat1~~ 0*lat2 \n'
+  mod1_duo_ort_fit <- cfa(model = mod1_duo_ort, sample.cov = S, sample.nobs = 1250)
+  summary(mod1_duo_ort_fit, fit.measures = TRUE, standardized=TRUE )
+  modificationindices(object = mod1_duo_ort_fit,sort. = TRUE)
+  
+  
+  mod2_duo_ort <- ' lat1=~ Y1+Y2+Y3+Y4+Y5 \n
+                    lat2=~ Y6+Y7+Y8+Y9+Y10+Y5+Y4+Y1 \n
+                    lat1~~ 0*lat2 \n'
+  mod2_duo_ort_fit <- cfa(model = mod2_duo_ort, sample.cov = S, sample.nobs = 1250)
+  summary(mod2_duo_ort_fit, fit.measures = TRUE, standardized=TRUE )
+  modificationindices(object = mod2_duo_ort_fit,sort. = TRUE)
+  
+  
+  
+  cfa_fits = matrix(NA, 3,6)  #creo mattice nuovo
+  cfa_fits[1,] = fitmeasures(object = mod_duo_ort_fit,
+                             fit.measures = c('RMSEA', 'CFI', 'AIC', 'chisq', 'df', 'npar')) 
+  cfa_fits[2,] = fitmeasures(object = mod1_duo_ort_fit,
+                             fit.measures = c('RMSEA', 'CFI', 'AIC', 'chisq', 'df', 'npar'))
+  cfa_fits[3,] = fitmeasures(object = mod2_duo_ort_fit,
+                             fit.measures = c('RMSEA', 'CFI', 'AIC', 'chisq', 'df', 'npar'))
+  
+  colnames(cfa_fits) = c('RMSEA', 'CFI', 'AIC', 'chisq', 'df', 'npar')
+  rownames(cfa_fits) = c('mod', 'mod1', 'mod2')
+  round(cfa_fits, 4)
+  
+  #modifico con la riduzione della lambda
+  mod3_duo_ort <- ' lat1=~ Y1+Y2+Y4+Y5 \n
+                    lat2=~ Y6+Y7+Y8+Y9+Y10 \n
+                    lat1~~ 0*lat2 \n'
+  mod3_duo_ort_fit <- cfa(model = mod3_duo_ort, sample.cov = S, sample.nobs = 1250)
+  summary(mod3_duo_ort_fit, fit.measures = TRUE, standardized=TRUE )
+  
+  mod3_duo_ort <- ' lat1=~ Y1+Y4+Y5 \n
+                    lat2=~ Y6+Y7+Y8+Y9+Y10 \n
+                    lat1~~ 0*lat2 \n'
+  mod3_duo_ort_fit <- cfa(model = mod3_duo_ort, sample.cov = S, sample.nobs = 1250)
+  summary(mod3_duo_ort_fit, fit.measures = TRUE, standardized=TRUE )
+  
+  
+  cfa_fits = matrix(NA, 4,6)  #creo mattice nuovo
+  cfa_fits[1,] = fitmeasures(object = mod_duo_ort_fit,
+                             fit.measures = c('RMSEA', 'CFI', 'AIC', 'chisq', 'df', 'npar')) 
+  cfa_fits[2,] = fitmeasures(object = mod1_duo_ort_fit,
+                             fit.measures = c('RMSEA', 'CFI', 'AIC', 'chisq', 'df', 'npar'))
+  cfa_fits[3,] = fitmeasures(object = mod2_duo_ort_fit,
+                             fit.measures = c('RMSEA', 'CFI', 'AIC', 'chisq', 'df', 'npar'))
+  cfa_fits[4,] = fitmeasures(object = mod3_duo_ort_fit,
+                             fit.measures = c('RMSEA', 'CFI', 'AIC', 'chisq', 'df', 'npar'))
+  
+  colnames(cfa_fits) = c('RMSEA', 'CFI', 'AIC', 'chisq', 'df', 'npar')
+  rownames(cfa_fits) = c('mod', 'mod1', 'mod2', 'mod3')
+  round(cfa_fits, 4)
+  
+  #mod1 e 2 hanno parametri meglio ma l'interpretazione peggiora datto il numero di crossloading
+  
+  #3° punto -------
+  
+  source('Utilities-20221124/reliability_semTools.R')
+  reliability(mod2_duo_ort_fit)
+  
+  #attendibilità della scala è na merda
   
 }
