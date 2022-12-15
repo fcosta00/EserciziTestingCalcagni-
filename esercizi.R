@@ -380,3 +380,25 @@
   #attendibilità della scala è na merda
   
 }
+
+
+# E s e r c i z i o   1 3
+{
+  load('Datasets-20221124/finance.Rdata')
+  source('Utilities-20221124/utilities.R')
+  
+  str(finance)
+  
+  fin <- split_dataset(data = finance, prop = 0.3, seed = 90210)
+  
+  #2
+  S <- cor(fin$A[,2:11], method = 'spearman')
+  D <- dist(S, method = 'euclidean')
+  hc <- hclust(d = D, method = 'ward.D2')
+  plot(hc)
+  
+  hclust2lavaan(tree = hc, ngroups = 2)
+  
+  
+  
+}
