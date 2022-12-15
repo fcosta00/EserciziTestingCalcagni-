@@ -414,6 +414,25 @@
   mod_deb = cfa(model = mod, data = fin_train, order = colnames(fin_train)[2:11], estimator = 'DWLS', group = 'PPGENDER', group.equal = 'loadings')
   anova(mod_deb, mod_conf, test = 'chisq') #> 0.05
   #riufiutiamo h0, per cui l'invarianza è una merda
+  #dobbiamo raggiungere almeno il livello forte per cui dobbiamo modificare il modello
+  #come invarianza completa non si raggiunge nemmeno la debole
+  
+  #ora guardiamo l'invarianza parziale in quanto la completa non si raggiunge
+  # la si valuta se e solo se non si raggiunge la completa
+  #(parziale) qualche lambda diversa l'accettiamo
+  
+  evaluate_partial_invariance(fitted_model = mod_deb, type = c('metric'))
+  # ci serve per capire che legami liberare
+  # dato che il pvalue è molto basso liberiamo molti parametri subito così da aumnetare abbastanza il pvalue
+  
+  mod_deb_parz = cfa(model = mod, data = fin_train, order = colnames(fin_train)[2:11], estimator = 'DWLS', group = 'PPGENDER', group.equal = 'loadings', group.partial = c('eta2 =~ FWB1_5 ', 'eta2 =~ FWB1_3', 'eta2 =~ FWB2_1'))
+  anova(mod_deb, mod_conf, test = 'chisq') #> 0.05
+  
+  
+  mod_forte = cfa(model = mod, data = fin_train, order = colnames(fin_train)[2:11], estimator = 'DWLS', group = 'PPGENDER', group.equal = c('loadings','intercepts'), group.partial = c('eta2 =~ FWB1_5 ', 'eta2 =~ FWB1_3', 'eta2 =~ FWB2_1'))
+  anova(mod_forte, mod_deb_parz, test = 'chisq') #> 0.05
+  
+  
   
   
 }
