@@ -382,23 +382,39 @@
 }
 
 
-# E s e r c i z i o   1 3
+# E s e r c i z i o   1 
 {
   load('Datasets-20221124/finance.Rdata')
   source('Utilities-20221124/utilities.R')
   
   str(finance)
   
-  fin <- split_dataset(data = finance, prop = 0.3, seed = 90210)
+  #1
+  fin <- split_dataset(data = finance, prop = 0.3, seed = 8219291)
+  fin_train <- fin$B
+  fin_test <- fin$A
   
   #2
-  S <- cor(fin$A[,2:11], method = 'spearman')
+  S <- cor(fin_test[,2:11], method = 'spearman')
   D <- dist(S, method = 'euclidean')
   hc <- hclust(d = D, method = 'ward.D2')
   plot(hc)
   
   hclust2lavaan(tree = hc, ngroups = 2)
   
+  #3
+  for(j in 2:11){
+    fin_train[,j] = factor(fin_train[,j], order = TRUE)
+  }
+  fin_train$PPGENDER = as.character(fin_train$PPGENDER)
+  
+  mod = "eta1 =~ FWB1_1+FWB1_2+FWB1_4+FWB2_2 \n eta2 =~ FWB1_3+FWB1_5+FWB1_6+FWB2_1+FWB2_3+FWB2_4"
+  mod_conf = cfa(model = mod, data = fin_train, order = colnames(fin_train)[2:11], estimator = 'DWLS', group = 'PPGENDER')
+  
+  mod_deb = cfa(model = mod, data = fin_train, order = colnames(fin_train)[2:11], estimator = 'DWLS', group = 'PPGENDER', group.equal = 'loadings')
+  anova(mod_deb, mod_conf, test = 'chisq') #> 0.05
+  #riufiutiamo h0, per cui l'invarianza è una merda
   
   
 }
+
