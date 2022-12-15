@@ -426,7 +426,7 @@
   # dato che il pvalue è molto basso liberiamo molti parametri subito così da aumnetare abbastanza il pvalue
   
   mod_deb_parz = cfa(model = mod, data = fin_train, order = colnames(fin_train)[2:11], estimator = 'DWLS', group = 'PPGENDER', group.equal = 'loadings', group.partial = c('eta2 =~ FWB1_5 ', 'eta2 =~ FWB1_3', 'eta2 =~ FWB2_1'))
-  anova(mod_deb, mod_conf, test = 'chisq') #> 0.05
+  anova(mod_deb_parz, mod_conf, test = 'chisq') #> 0.05
   
   
   mod_forte = cfa(model = mod, data = fin_train, order = colnames(fin_train)[2:11], estimator = 'DWLS', group = 'PPGENDER', group.equal = c('loadings','intercepts'), group.partial = c('eta2 =~ FWB1_5 ', 'eta2 =~ FWB1_3', 'eta2 =~ FWB2_1'))
