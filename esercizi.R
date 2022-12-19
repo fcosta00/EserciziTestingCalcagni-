@@ -492,6 +492,17 @@
   #il test è invariante in senso forte al netto dei legami specificati FWB1_5 FWB1_3 FWB2_1 non uguali tra i gruppi
   
   
+  summary_table(fitted_model = mod_forte_parz, type_summary = 'latent')
+  # dato che le le lambda sono pressochè tutte uguali non ha senso guardarle perchè non ci forniscono informazioni oer la differenza tra i modelli
+  
+  summary_table(fitted_model = mod_forte_parz, type_summary = 'intercept', standardized = TRUE)
+  #intercetta = medie
+  #le intercette sono 0 perchè sono centrate
+  #possiamo confrontare le mi tra il primo e il secondo gruppo (uno dei due gruppi è fissato a zero come baseline)
+  #si interpretano sempre o le medie (intercette), o i factor scores o le varienze d'errore
+  #la differenza è significaztiva perchè il pvalue è 0 (<0.05) e il z è molto alto
+  
+  
   
 }
 
