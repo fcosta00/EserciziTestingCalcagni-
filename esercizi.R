@@ -381,8 +381,65 @@
   
 }
 
+# E s e r c i z i o   6
+{
+  source('Utilities-20221124/utilities.R')
+  library(lavaan)
+  library(semPlot)
+  
+  str(data_ex4)
+  
+  # es4 ----------
+  data_ord = data_ex4 # d'ora innanzi lavoriamo su bfi.ord che è lo stesso di bfi_B e contiene variabili dichiarate come ordinali
+  for(j in 1:NCOL(data_ord)){
+    data_ord[,j] = factor(data_ord[,j],ordered = TRUE)
+  }
+  
+  mod_uni <- 'lat1=~ V1+V2+V3+V4+V5+V6+V7+V8+V9+V10+V11+V12+V13+V14+V15 \n'
+  mod_uni_fit <- cfa(model = mod_uni, data = data_ord, ordered = names(data_ord), estimator="DWLS")
+  summary(mod_uni_fit, fit.measures = TRUE, standardized=TRUE )
+  
+  mod_tri_ort <- ' lat1=~ V1+V2+V3+V4+V5 \n
+                    lat2=~ V6+V7+V8+V9+V10 \n
+                    lat3=~ V11+V12+V13+V14+V15 \n
+                    lat1~~ 0*lat2 \n
+                    lat1~~ 0*lat3 \n
+                    lat2~~ 0*lat3 \n'
+  mod_tri_ort_fit <- cfa(model = mod_tri_ort, data = data_ord, ordered = names(data_ord), estimator="DWLS")
+  summary(mod_tri_ort_fit, fit.measures = TRUE, standardized=TRUE )
+  
+  mod_tri_clx <- ' lat1=~ V1+V2+V3+V4+V5 \n
+                    lat2=~ V6+V7+V8+V9+V10 \n
+                    lat3=~ V11+V12+V13+V14+V15 \n'
+  mod_tri_clx_fit <- cfa(model = mod_tri_clx, data = data_ord, ordered = names(data_ord), estimator="DWLS")
+  summary(mod_tri_clx_fit, fit.measures = TRUE, standardized=TRUE )
+  
+  bfi.fits = matrix(NA,3,5) #matrice per i risultati dei fit dei modelli
+  bfi.fits[1,] = fitmeasures(object = mod_uni_fit,fit.measures = c("RMSEA","CFI","chisq","df","npar"))
+  bfi.fits[2,] = fitmeasures(object = mod_tri_ort_fit,fit.measures = c("RMSEA","CFI","chisq","df","npar"))
+  bfi.fits[3,] = fitmeasures(object = mod_tri_clx_fit,fit.measures = c("RMSEA","CFI","chisq","df","npar"))
+  rownames(bfi.fits) = c("mod_uni","mod_tri_ort",'mod_tri_clx')
+  colnames(bfi.fits) = c("RMSEA","CFI","chisq","df","npar")
+  #il mod_tri_clx è notevolemente migliore secondo ogni indice
+  
+  plot_lavaan_model(fitted_model = mod_tri_clx_fit)
+  
+  # Estrazione delle matrici del modello 
+  A = inspect(object = mod_tri_clx_fit,what = "std.all")
+  
+  A$lambda #Lambda
+  A$theta #Theta_delta
+  A$psi #Phi
+  
+  reliability(mod_tri_clx_fit)
+  #i valori di attendibilità del modello sono ancora molto bassi
+  
+  
+  
+  
+}
 
-# E s e r c i z i o   1 
+# E s e r c i z i o   1 2
 {
   load('Datasets-20221124/finance.Rdata')
   source('Utilities-20221124/utilities.R')
@@ -427,11 +484,12 @@
   
   mod_deb_parz = cfa(model = mod, data = fin_train, order = colnames(fin_train)[2:11], estimator = 'DWLS', group = 'PPGENDER', group.equal = 'loadings', group.partial = c('eta2 =~ FWB1_5 ', 'eta2 =~ FWB1_3', 'eta2 =~ FWB2_1'))
   anova(mod_deb_parz, mod_conf, test = 'chisq') #> 0.05
+  #il test è invariante in senso debole tranne per gli item FWB1_5 FWB1_3 FWB2_1
   
   
-  mod_forte = cfa(model = mod, data = fin_train, order = colnames(fin_train)[2:11], estimator = 'DWLS', group = 'PPGENDER', group.equal = c('loadings','intercepts'), group.partial = c('eta2 =~ FWB1_5 ', 'eta2 =~ FWB1_3', 'eta2 =~ FWB2_1'))
-  anova(mod_forte, mod_deb_parz, test = 'chisq') #> 0.05
-  
+  mod_forte_parz = cfa(model = mod, data = fin_train, order = colnames(fin_train)[2:11], estimator = 'DWLS', group = 'PPGENDER', group.equal = c('loadings','intercepts'), group.partial = c('eta2 =~ FWB1_5 ', 'eta2 =~ FWB1_3', 'eta2 =~ FWB2_1'))
+  anova(mod_forte_parz, mod_deb_parz, test = 'chisq') #> 0.05
+  #il test è invariante in senso forte al netto dei legami specificati FWB1_5 FWB1_3 FWB2_1 non uguali tra i gruppi
   
   
   
