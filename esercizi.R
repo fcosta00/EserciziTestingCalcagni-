@@ -502,7 +502,7 @@
   #si interpretano sempre o le medie (intercette), o i factor scores o le varienze d'errore
   #la differenza è significaztiva perchè il pvalue è 0 (<0.05) e il z è molto alto
   
-  
+  summary_table()
   
 }
 

@@ -40,7 +40,7 @@ bfi.fits[3,] = fitmeasures(object = mod3_fit,fit.measures = c("RMSEA","CFI","AIC
 rownames(bfi.fits) = c("parallelo","tau",'conva')
 colnames(bfi.fits) = c("RMSEA","CFI","AIC","df","npar")
 
-#AIC confronto modelli, ma bisogno controllare gli indici di fit comunque RMSEA e CFI in range
+#AIC (più basso è meglio è) confronto modelli, ma bisogno controllare gli indici di fit comunque RMSEA e CFI in range
 #CFI > 0.95 e RMSEA < 0.08
 
 #interpretiamo il modello congenerico
