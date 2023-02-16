@@ -1,3 +1,23 @@
+
+prcomp2lavaan = function(prcomp_output = NULL,numPC = NULL,thr = 0.35,rotate=c("varimax","oblimin","none")){
+  require(GPArotation)
+  rotate = match.arg(rotate)
+  X = switch (rotate,
+              "none" = prcomp_output$rotation,
+              "varimax" = GPArotation::Varimax(L = prcomp_output$rotation)[[2]],
+              "oblimin" = GPArotation::oblimin(L = prcomp_output$rotation)[[2]]
+  )
+  iidlist = apply(X,2,function(x)which(abs(x)>thr))
+  vars = names(prcomp_output$center)
+  out=list()
+  for(j in 1:numPC){out[[j]] = vars[iidlist[[j]]]}
+  names(out) = paste0("eta",1:length(out))
+  mod = ""
+  for(j in 1:numPC){mod = c(mod, paste0(names(out)[j]," =~ ",paste(out[[j]],collapse = "+")))}
+  mod = paste(mod[2:length(mod)],collapse = " \n ")
+  return(mod)
+}
+
 evaluate_partial_invariance = function(fitted_model = NULL,type = c("metric","scalar","strict")){
   type = match.arg(type)
   typechar = switch(EXPR = type,
@@ -27,17 +47,18 @@ summary_table = function(fitted_model = NULL,type_summary=c("all","latent->manif
   types = match.arg(arg = type_summary,choices = c("all","latent->manifest","covariance","variance","intercept","threshold"),several.ok = FALSE)
   
   X = summary(fitted_model,standardized=standardized)
+  est_field = ifelse(standardized==TRUE,"std.all","est")
   if(fitted_model@Model@ngroups>1){
-    X = cbind(rep(NA,NROW(X)),rep("|",NROW(X)),X$pe[,c("lhs","op","rhs","group","est","se","z","pvalue")])
+    X = cbind(rep(NA,NROW(X$pe)),rep("|",NROW(X$pe)),X$pe[,c("lhs","op","rhs","group",est_field,"se","z","pvalue")])
   }else{
-    X = cbind(rep(NA,NROW(X)),rep("|",NROW(X)),X$pe[,c("lhs","op","rhs","est","se","z","pvalue")])
+    X = cbind(rep(NA,NROW(X$pe)),rep("|",NROW(X$pe)),X$pe[,c("lhs","op","rhs",est_field,"se","z","pvalue")])
   }
   X[grep(x = X[,4],pattern = "=~",fixed=TRUE),1] = "latent->manifest"
   X[grep(x = X[,4],pattern = "~~",fixed=TRUE),1] = "covariance"
   X[grep(x = X[,4],pattern = "~*~",fixed=TRUE),1] = "variance"
   X[grep(x = X[,4],pattern = "~1",fixed = TRUE),1] = "intercept"
   X[grep(x = X[,4],pattern = "|",fixed = TRUE),1] = "threshold"
-  colnames(X)[1:2] = c("parameter","")
+  colnames(X)[1:2] = c("parameter",""); colnames(X)[6] = "est"
   X[,c("est","se","z","pvalue")] = round(X[,c("est","se","z","pvalue")],4)
   X[is.na(X)] = ""
   
@@ -96,6 +117,7 @@ errLavaan = function(x, obj){
 lavaan_error_MC = function(fitted_model = NULL, new_data = NULL, B = 500){
   require(lavaan); require(mvtnorm)
   n = fitted_model@SampleStats@nobs[[1]]
+  for(j in 1:NCOL(new_data)){new_data[,j]=as.numeric(new_data[,j])}
   Sigma = lavTech(fitted_model, "sigma.hat")[[1]]
   err = rep(NA,B)
   for(b in 1:B){

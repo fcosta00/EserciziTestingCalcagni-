@@ -21,7 +21,7 @@
   mod_uni_fit_UVI = cfa( model = mod_uni, sample.cov = Chen, sample.nobs = 403, std.lv = TRUE)
   mod_uni_fit_ULI = cfa( model = mod_uni, sample.cov = Chen, sample.nobs = 403)
   
-  summary(mod_uni_fit_UVI, fit.measures = TRUE)
+  summary(mod_uni_fit_UVI, fit.measures = TRUE, standardized = TRUE)
   summary(mod_uni_fit_ULI, fit.measures = TRUE) #si può vedere il riassunto del nostro modello fittato e la differenza tra uli e uvi
   
   # 3° punto
@@ -381,6 +381,52 @@
   
 }
 
+# E s e r c i z i o   5  di nuovo
+{
+  load('Datasets-20221124/data_ex5.Rdata')
+  
+  #1° punto ------
+  mod_ort <- ' lat1=~ Y1+Y2+Y3+Y4+Y5 \n
+              lat2=~ Y6+Y7+Y8+Y9+Y10 \n
+              lat1~~ 0*lat2 \n'
+  
+  mod_ort_fit <- cfa(model = mod_ort, sample.cov = S, sample.nobs = 1250)
+  summary(mod_ort_fit, fit.measures = TRUE, standardized=TRUE )
+  summary(mod_ort_fit, standardized=TRUE )
+  
+  # 2° punto
+  fitmeasures(object = mod_ort_fit, fit.measures = c('RMSEA', 'CFI', 'AIC', 'chisq', 'df', 'npar'))
+  #sia rmsea che il cfi sono fuori scala per cui procedo con una procedura razionale per migliorare il modello
+  
+  summary(mod_ort_fit, fit.measures = TRUE, standardized=TRUE ) # Y3 ha una lambda estremamente bassa per cui la tolgo
+  
+  mod1_ort <- ' lat1=~ Y1+Y2+Y4+Y5 \n
+              lat2=~ Y6+Y7+Y8+Y9+Y10 \n
+              lat1~~ 0*lat2 \n'
+  
+  mod1_ort_fit <- cfa(model = mod1_ort, sample.cov = S, sample.nobs = 1250)
+  summary(mod1_ort_fit, fit.measures = TRUE, standardized=TRUE )
+  fitmeasures(object = mod1_ort_fit, fit.measures = c('RMSEA', 'CFI', 'AIC', 'chisq', 'df', 'npar'))
+  #sia rmsea che il cfi sono fuori scala per cui procedo con una procedura razionale per migliorare il modello
+  
+  summary(mod1_ort_fit, fit.measures = TRUE, standardized=TRUE ) #il lambda di Y2 è estremamente bassa per cui lo tolgo
+  
+  mod2_ort <- ' lat1=~ Y1+Y4+Y5 \n
+              lat2=~ Y6+Y7+Y8+Y9+Y10 \n
+              lat1~~ 0*lat2 \n'
+  
+  mod2_ort_fit <- cfa(model = mod2_ort, sample.cov = S, sample.nobs = 1250)
+  summary(mod2_ort_fit, fit.measures = TRUE, standardized=TRUE )
+  fitmeasures(object = mod2_ort_fit, fit.measures = c('RMSEA', 'CFI', 'AIC', 'chisq', 'df', 'npar'))
+  
+  #utilizzando una procedura razionale sotrattiva l'adattamento non è migliorato a sufficienza per cui provo la procedura tramite gli indici di modifica
+  
+  modificationindices(object = mod2_ort_fit,standardized = TRUE)
+  
+  
+  
+}
+
 # E s e r c i z i o   6
 {
   source('Utilities-20221124/utilities.R')
@@ -435,8 +481,170 @@
   #i valori di attendibilità del modello sono ancora molto bassi
   
   
+  # valutiamo l'errore di previzione --------
+  source('Utilities-20221124/utilities.R')
+  err_m1 = kFold_validation(model_definition = mod_uni, dwls = TRUE, data = data_ex4,nfold = 5,error = 'montecarlo',force_crossValid = TRUE, B = 100)
+  err_m2 = kFold_validation(model_definition = mod_tri_ort, dwls = TRUE, data = data_ex4,nfold = 5,error = 'montecarlo',force_crossValid = TRUE, B = 100)
+  err_m3 = kFold_validation(model_definition = mod_tri_clx, dwls = TRUE, data = data_ex4,nfold = 5,error = 'montecarlo',force_crossValid = TRUE, B = 100)
+  
+  boxplot(err_m1, err_m2, err_m3)
+  t.test(err_m1, err_m2)
   
   
+  
+}
+
+# E s e r c i z i o   7
+{
+  load('Datasets-20221124/rse.RData')
+  source('Utilities-20221124/utilities.R')
+  library('lavaan')
+  
+  
+  datax <- rse
+  
+  str(datax)
+  head(datax)
+  summary(datax)
+  
+  # 1° punto ----
+  datax <- split_dataset(data = datax, prop = 0.6)
+  
+  # 2° punto ----
+  m_cor <- cor( datax$A[1:10], method = 'spearman') # method='spearman' se ci sono variabili categoriali
+  heatmap( m_cor, symm= TRUE, hclustfun = hclust)
+  
+  D <- dist(m_cor, method = 'euclidean')
+  hc <- hclust(d = D, method = 'ward.D2')
+  plot(hc)
+  
+  # 3° punto ----
+  mod_1 <- hclust2lavaan(tree = hc, ngroups = 2)
+  mod_2 <- "eta1 =~ Q1+Q2+Q3+Q4+Q5+Q6+Q7+Q8+Q9+Q10"
+  mod_3 <- "eta1 =~ Q1+Q2+Q4 \n eta2 =~ Q3+Q5+Q6+Q7+Q8+Q9+Q10 \n sovr =~ eta1+eta2 \n"
+  
+  mod_1_fit <- cfa( model = mod_1, data = datax$B[,1:10], ordered=c('Q1','Q2','Q3','Q4','Q5','Q6','Q7','Q8','Q9','Q10'), estimator="DWLS")
+  mod_2_fit <- cfa( model = mod_2, data = datax$B[,1:10], ordered=c('Q1','Q2','Q3','Q4','Q5','Q6','Q7','Q8','Q9','Q10'), estimator="DWLS")
+  mod_3_fit <- cfa( model = mod_3, data = datax$B[,1:10], ordered=c('Q1','Q2','Q3','Q4','Q5','Q6','Q7','Q8','Q9','Q10'), estimator="DWLS")
+  
+  # 4° punto ----
+  summary(mod_1_fit, standardized=TRUE )
+  summary(mod_2_fit, standardized=TRUE )
+  summary(mod_3_fit, standardized=TRUE )
+  
+  
+  round(fitmeasures(object = mod_1_fit, fit.measures = c("RMSEA","CFI","AIC","chisq","df","npar")), 3)
+  round(fitmeasures(object = mod_2_fit, fit.measures = c("RMSEA","CFI","AIC","chisq","df","npar")), 3)
+  round(fitmeasures(object = mod_3_fit, fit.measures = c("RMSEA","CFI","AIC","chisq","df","npar")), 3)
+  #il modello migliore è il primo, l'aggiunta di una sovraordinata non ha portato a un adattamento migliore ai dati
+  #inoltre il terzo modello sembra avere errori di convergenza dato il mancato calcolo di alcuni standard error
+  
+  # 5° punto ----
+  err_m1 = kFold_validation(model_definition= mod_1, dwls = TRUE, data= rse[,1:10], nfold= 10, error= 'montecarlo', force_crossValid= TRUE, B= 100)
+  err_m2 = kFold_validation(model_definition= mod_2, dwls = TRUE, data= rse[,1:10], nfold= 10, error= 'montecarlo', force_crossValid= TRUE, B= 100)
+  err_m3 = kFold_validation(model_definition= mod_3, dwls = TRUE, data= rse[,1:10], nfold= 10, error= 'montecarlo', force_crossValid= TRUE, B= 100)
+  
+  boxplot(err_m1, err_m2, err_m3)
+  t.test(err_m1, err_m2)
+  
+  # 6° punto ----
+  
+  matrix1 = inspect(object = mod_1_fit, what="std.all")
+  matrix2 = inspect(object = mod_2_fit, what="std.all")
+  matrix3 = inspect(object = mod_3_fit, what="std.all")
+  
+  matrix1$lambda
+  matrix1$theta
+  matrix1$psi
+  
+  matrix2$lambda
+  matrix2$theta
+  matrix2$psi
+  
+  matrix3$lambda
+  matrix3$theta
+  matrix3$psi
+  
+  x11();semPaths(object = mod_3_fit, what="model", whatLabels = "std.all")
+  
+  
+  #tramite le analisi svolte notiamo, come prevedibile, che il modello meno adattato ai dati è quello con l'errore di previsione mediano minore e son la varianza di esso minore. 
+  #Nonostante ciò preferisco scegliere come modello "migliore" il primo in quanto ha indici di adattamento migliori, soprattuto sull'RMSEA, che si avvicina maggiormente a valori validi.
+  # Do per cui precedenza all'adattamento ai dati visto anche che, con un test t base degli errori di previsioni non sembra significativa la differenza tra il primo e il secondo
+  
+  # 7° punto
+  reliability(mod_1_fit, return.total = TRUE)
+}
+
+# E s e r c i z i o   8
+{
+  #semplicemente guardare il significato logico delle domande e creare un modello in base a quello
+  #zero sbatta
+}
+
+# E s e r c i z i o   9
+{
+  source('Utilities-20221124/utilities.R')
+  library(lavaan)
+  library(semPlot)
+  
+  datax <- dataex9
+  
+  str(datax)
+  
+  datax <- datax[,2:7]
+  
+  # 1° punto ----
+  mod_1 <- "eta1 =~ y1+y2+y3+y4+y5+y6"
+  mod_2 <- 'eta1 =~ y1+y2+y3+y4 \n eta2 =~ y5+y6'
+  mod_3 <- "eta1 =~ y1+y2+y3+y4 \n eta2 =~ y5+y6 \n etabi =~ y1+y2+y3+y4+y5+y6 \n etabi ~~ 0*eta1 \n etabi ~~ 0*eta2"
+  
+  # 2° punto
+  mod_1_fit <- cfa( model = mod_1, data = datax) #varibili continue
+  mod_2_fit <- cfa( model = mod_2, data = datax) #varibili continue
+  mod_3_fit <- cfa( model = mod_3, data = datax) #varibili continue
+  
+  round(fitmeasures(object = mod_1_fit, fit.measures = c('RMSEA', 'CFI', 'AIC', 'chisq', 'df', 'npar')), 3)
+  round(fitmeasures(object = mod_2_fit, fit.measures = c('RMSEA', 'CFI', 'AIC', 'chisq', 'df', 'npar')), 3)
+  round(fitmeasures(object = mod_3_fit, fit.measures = c('RMSEA', 'CFI', 'AIC', 'chisq', 'df', 'npar')), 3)
+  #scelgo il modello 2
+  
+  # 3° punto
+  err_m1 = kFold_validation(model_definition= mod_1, dwls = FALSE, data= datax, nfold= 10, error= 'montecarlo', force_crossValid= TRUE, B= 100)
+  err_m2 = kFold_validation(model_definition= mod_2, dwls = FALSE, data= datax, nfold= 10, error= 'montecarlo', force_crossValid= TRUE, B= 100)
+  err_m3 = kFold_validation(model_definition= mod_3, dwls = FALSE, data= datax, nfold= 10, error= 'montecarlo', force_crossValid= TRUE, B= 100)
+  
+  boxplot(err_m1, err_m2, err_m3)
+  
+  # 4° punto
+  summary(mod_2_fit, fit.measures = TRUE, standardized=TRUE )
+  #il valore della covarianza tra eta1 e eta2 ha una buona significatività. infatti standardizzato si attesta sui 0.76. questo potrebbe indicare un giovamento da una variabile sovraordinata
+  mod_4 <- 'eta1 =~ y1+y2+y3+y4 \n eta2 =~ y5+y6 \n sovr =~ eta1 + eta2 '
+  mod_4_fit <- cfa( model = mod_4, data = datax) #varibili continue
+  round(fitmeasures(object = mod_4_fit, fit.measures = c('RMSEA', 'CFI', 'AIC', 'chisq', 'df', 'npar')), 3)
+  #perde un minimo di adattamento
+  x11();semPaths(object = mod_4_fit, what="model", whatLabels = "std.all")
+  
+  # 5° punto
+  err_m2 = kFold_validation(model_definition= mod_2, dwls = FALSE, data= datax, nfold= 10, error= 'montecarlo', force_crossValid= TRUE, B= 100)
+  err_m4 = kFold_validation(model_definition= mod_4, dwls = FALSE, data= datax, nfold= 10, error= 'montecarlo', force_crossValid= TRUE, B= 100)
+  boxplot(err_m4, err_m2)
+  #mantengo la scelta del modello 2 senza sovraordinata perchè, seppur l'adattamento e la capacità previsionale è comparabile è di più facile interpretazione e d è più parsimonioso
+  
+  # 6° punto
+  reliability(mod_2_fit,return.total = TRUE)
+  
+  # 7° punto
+  
+  pr_ftt = lavPredict(object = mod_2_fit,type = "lv",method = "regression")
+  
+  matrix2 = inspect(object = mod_2_fit, what="std.all")
+  zeta <- (pr_ftt %*% matrix2$psi) %*% c(1,1)
+  
+  hist(bfi.eta[,1],main="eta1",ylab="",xlab="")
+  hist(bfi.eta[,2],main="eta2",ylab="",xlab="")
+  hist(fg[,1],main="eta1",ylab="",xlab="")
+  hist(fg[,2],main="eta2",ylab="",xlab="")
 }
 
 # E s e r c i z i o   1 2
@@ -505,4 +713,109 @@
   summary_table()
   
 }
+
+
+# E s e r c i z i o   1 3
+{
+  load('Datasets-20221124/SCS.Rdata')
+  library(lavaan)
+  library(semPlot)
+  library(mvtnorm)
+  source('Utilities-20221124/utilities.R')
+  
+  # 1° punto
+  datax <- SCS
+  str(datax)
+  head(datax)
+  summary(datax)
+  datax <- split_dataset(data = datax, prop = 0.4, seedx = 90211)
+  
+  # 2° punto
+  pc = prcomp(datax$A[,1:10],center = TRUE,scale. = TRUE)
+  var_spiegata = pc$sdev^2
+  plot(pc, type="l")
+  prop = var_spiegata/sum(var_spiegata)
+  prop_cumulata = cumsum(prop)
+  
+  pc$rotation
+  
+  mod_1 <- prcomp2lavaan(prcomp_output = pc, numPC = 3, thr = 0.3)
+  
+  # 3° punto
+  for(j in 1:10){
+    datax$B[,j] = factor(datax$B[,j],ordered = TRUE)
+  }
+  datax$B$gender <- as.factor(datax$B$gender) #costringo R a interpretare gender come fattore(categoriale)
+  mod_1 <-'eta1 =~ Q1+Q3+Q7+Q10
+          eta2 =~ Q1+Q2+Q3+Q6+Q8+Q9 
+          eta3 =~ Q3+Q5
+          eta1 ~~ 0*eta2
+          eta1 ~~ 0*eta3
+          eta2 ~~ 0*eta3'
+  
+  mod_1_fit <-  cfa( model = mod_1, data = datax$B[,1:10], ordered=colnames(datax$B[,1:10]), estimator="DWLS")
+  lavaan_checkConvergence(mod_1_fit)
+  round(fitmeasures(object = mod_1_fit, fit.measures = c('RMSEA', 'CFI', 'AIC', 'chisq', 'df', 'npar')), 3)
+  summary(mod_1_fit, fit.measures = TRUE, standardized=TRUE )
+  
+  mod_2 <-'eta1 =~ Q1+Q3+Q7+Q10+Q2+Q6+Q8+Q9+Q5'
+  
+  mod_2_fit <-  cfa( model = mod_2, data = datax$B[,1:10], ordered=colnames(datax$B[,1:10]), estimator="DWLS")
+  lavaan_checkConvergence(mod_2_fit)
+  round(fitmeasures(object = mod_2_fit, fit.measures = c('RMSEA', 'CFI', 'AIC', 'chisq', 'df', 'npar')), 3)
+  summary(mod_2_fit, fit.measures = TRUE, standardized=TRUE )
+  
+  # 4° punto
+  reliability(mod_1_fit,return.total = TRUE)
+  reliability(mod_2_fit,return.total = TRUE)
+  
+  #
+  
+}
+
+
+# E s e r c i z i o   14
+{
+  # 1) invarianza configurale
+  mod_2_conf = cfa(model = mod_2,data = datax$B,group = "gender")
+  # Il modello configurale è la baseline della procedura incrementale
+  
+  # 2) invarianza debole
+  mod_2_weak = cfa(model = mod_2,data = datax$B,group = "gender",group.equal="loadings")
+  anova(mod_2_conf,mod_2_weak)
+  # L'invarianza debole è stabilita, il test del chi-quadrato non consente di rigettare l'ipotesi H0 dell'equivalenza dei due modelli. Possiamo procedere oltre.
+}
+
+
+# E s e r c i z i o   15
+{
+  pr_ftt = lavPredict(object = mod_2_fit,type = "lv",method = "regression")
+  
+  data_b_mod <- datax$B
+  data_b_mod$pr <- pr_ftt[,1] 
+  
+  rl_mod_2 = lm(pr ~ age + gender + age:gender, data=data_b_mod)
+  
+  summary(rl_mod_2)
+}
+
+
+
+
+matrix1$theta
+matrix1$psi
+
+
+
+
+
+mod_ort_UVI <- ' lat1=~ Y1+Y2+Y3+Y4+Y5 \n
+              lat2=~ Y6+Y7+Y8+Y9+Y10 \n'
+mod_ort_UVI_fit <- cfa(model = mod_ort_UVI, sample.cov = S, sample.nobs = 1250, std.lv = TRUE)
+summary(mod_ort_UVI_fit, standardized=TRUE )
+insp
+
+
+
+
 

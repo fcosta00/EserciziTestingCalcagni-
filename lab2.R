@@ -30,6 +30,7 @@ model.visual = "visual =~ x1+x2+x3"
 cfa.visual = cfa(model = model.visual,data = HolzingerSwineford1939)
 # L'adattamento del modello CFA ai dati avviene mediante la funzione cfa() che richiede in input i dati su cui adattare il modello. 
 # In alternativa, avremmo potuto usare la matrice di correlazione (se non ci fossero stati i dati) specificando anche il numero di osservazioni:
+
 S = cov(HolzingerSwineford1939[,7:9])
 cfa.visual = cfa(model = model.visual,sample.cov = S,sample.nobs = 301)
 
