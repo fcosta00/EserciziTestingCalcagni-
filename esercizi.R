@@ -1,4 +1,4 @@
-# E s e r c i z i o   1
+# E s e r c i z i o   1  -----
 {
   #installo psych e controllo la struttura del dataset Chen
   install.packages('psych')
@@ -59,7 +59,7 @@
   
 }
 
-# E s e r c i z i o   2
+# E s e r c i z i o   2  -----
 {
   library(datasets)
   str(attitude)
@@ -104,7 +104,7 @@
   #commento boh????????
 }
 
-# E s e r c i z i o   3
+# E s e r c i z i o   3  -----
 {
   load('Datasets-20221124/mach/mach.Rdata')
   
@@ -159,7 +159,7 @@
   reliability(mod_plu_fit_UVI)
 }
 
-# E s e r c i z i o   3   Modello Completo
+# E s e r c i z i o   3   Modello Completo  -----
 {
   load('Datasets-20221124/mach/mach.Rdata')
   
@@ -220,7 +220,7 @@
   #*sia gli alpha che gli omega hanno valori buoni sopra il 0.7
 }
 
-# E s e r c i z i o   4
+# E s e r c i z i o   4  -----
 {
   library(lavaan)
   library(semPlot)
@@ -289,7 +289,7 @@
   
 }
 
-# E s e r c i z i o   5
+# E s e r c i z i o   5  -----
 {
   load('Datasets-20221124/data_ex5.Rdata')
   library(lavaan)
@@ -381,7 +381,7 @@
   
 }
 
-# E s e r c i z i o   5  di nuovo
+# E s e r c i z i o   5  di nuovo  -----
 {
   load('Datasets-20221124/data_ex5.Rdata')
   
@@ -427,7 +427,7 @@
   
 }
 
-# E s e r c i z i o   6
+# E s e r c i z i o   6  -----
 {
   source('Utilities-20221124/utilities.R')
   library(lavaan)
@@ -494,7 +494,7 @@
   
 }
 
-# E s e r c i z i o   7
+# E s e r c i z i o   7  -----
 {
   load('Datasets-20221124/rse.RData')
   source('Utilities-20221124/utilities.R')
@@ -576,13 +576,13 @@
   reliability(mod_1_fit, return.total = TRUE)
 }
 
-# E s e r c i z i o   8
+# E s e r c i z i o   8  ----
 {
   #semplicemente guardare il significato logico delle domande e creare un modello in base a quello
   #zero sbatta
 }
 
-# E s e r c i z i o   9
+# E s e r c i z i o   9  ----
 {
   source('Utilities-20221124/utilities.R')
   library(lavaan)
@@ -647,7 +647,23 @@
   hist(fg[,2],main="eta2",ylab="",xlab="")
 }
 
-# E s e r c i z i o   1 2
+# E s e r c i z i o   1 0  ----
+{
+  source('Utilities-20221124/utilities.R')
+  library(lavaan)
+  library(semPlot)
+  library(mvtnorm)
+  
+  datax <- items_taylor_manifest_anxiety_scal
+  
+  str(datax)
+  head(datax)
+  summary(datax)
+  split_dataset(data = datax, prop = 0.6)
+  
+}
+
+# E s e r c i z i o   1 2  ----
 {
   load('Datasets-20221124/finance.Rdata')
   source('Utilities-20221124/utilities.R')
@@ -714,8 +730,7 @@
   
 }
 
-
-# E s e r c i z i o   1 3
+# E s e r c i z i o   1 3  ----
 {
   load('Datasets-20221124/SCS.Rdata')
   library(lavaan)
@@ -773,8 +788,7 @@
   
 }
 
-
-# E s e r c i z i o   14
+# E s e r c i z i o   1 4  ----
 {
   # 1) invarianza configurale
   mod_2_conf = cfa(model = mod_2,data = datax$B,group = "gender")
@@ -786,8 +800,7 @@
   # L'invarianza debole è stabilita, il test del chi-quadrato non consente di rigettare l'ipotesi H0 dell'equivalenza dei due modelli. Possiamo procedere oltre.
 }
 
-
-# E s e r c i z i o   15
+# E s e r c i z i o   1 5  -----
 {
   pr_ftt = lavPredict(object = mod_2_fit,type = "lv",method = "regression")
   
@@ -799,21 +812,19 @@
   summary(rl_mod_2)
 }
 
-
-
-
-matrix1$theta
-matrix1$psi
-
-
-
-
-
-mod_ort_UVI <- ' lat1=~ Y1+Y2+Y3+Y4+Y5 \n
-              lat2=~ Y6+Y7+Y8+Y9+Y10 \n'
-mod_ort_UVI_fit <- cfa(model = mod_ort_UVI, sample.cov = S, sample.nobs = 1250, std.lv = TRUE)
-summary(mod_ort_UVI_fit, standardized=TRUE )
-insp
+# E s e r c i z i o   1 6   ----
+{
+  source('Utilities-20221124/utilities.R')
+  library(lavaan)
+  library(semPlot)
+  library(mvtnorm)
+  load('Datasets-20221124/mimic.Rdata')
+  
+  datax <- mimic
+  datax$z <- z
+  
+  
+}
 
 
 
